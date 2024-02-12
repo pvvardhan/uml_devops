@@ -23,7 +23,7 @@ podTemplate(containers: [
 				stage('Build a Maven project') {
 					sh '''
 					echo "maven build"
-					mvn-B-DskipTests clean package
+					mvn -B -DskipTests clean package
 					'''
 					}
 			}
