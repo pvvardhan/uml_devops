@@ -1,7 +1,10 @@
 // week5 example uses Jenkin's "scripted" syntax, as opposed to its "declarative" syntax
  // see: https://www.jenkins.io/doc/book/pipeline/syntax/#scripted-pipeline
  // Defines a Kubernetes pod template that can be used to create nodes.
-podTemplate(containers: [
+podTemplate(
+	cloud: 'uml'
+	podRetention: onFailure()
+	containers: [
 	containerTemplate(
 		name: 'gradle', image: 'gradle:6.3-jdk14', command: 'sleep', args: '30d'
 		),
@@ -38,6 +41,25 @@ podTemplate(containers: [
 							reportDir: 'Chapter08/sample1/build/reports/tests/test',
 							reportFiles: 'index.html',
 							reportName: "JaCoCo Report"
+						])
+				}
+				stage("CheckStyle Analysis") {
+						try {
+						sh '''
+							pwd
+							cd Chapter08/sample1
+							./gradlew checkstyleMain
+							./gradlew jacocoTestReport
+						'''
+						} catch (Exception E) {
+							echo 'Failure detected'
+						}
+						// from the HTML publisher plugin
+						// https://www.jenkins.io/doc/pipeline/steps/htmlpublisher/
+						publishHTML (target: [
+							reportDir: 'Chapter08/sample1/build/reports/checkstyle',
+							reportFiles: 'main.html',
+							reportName: "JaCoCo Checkstyle"
 						])
 				}
 			}
