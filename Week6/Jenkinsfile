@@ -1,55 +1,62 @@
-// This example uses Jenkin's "declarative" syntax
-
-pipeline {
-  agent {
-    kubernetes {
-      // Define the pod template directly within the kubernetes agent
-      containerTemplate {
-        name 'gradle'
-        image 'gradle'
-        command 'sleep'
-        args '30d'
-      }
-    }
-  }
-
-  stages {
-    stage('Checkout code and prepare environment') {
-      steps {
-        git url: 'https://github.com/pvvardhan/Continuous-Delivery-with-Docker-and-Jenkins-Second-Edition.git', branch: 'main'
-        sh '''
-          cd Chapter08/sample1
-          chmod +x gradlew
-        '''
-      }
-    }
-    stage('Run tests and generate reports') {
-      steps {
-        sh '''
-          cd Chapter08/sample1
-          ./gradlew test
-        '''
-        }
-    }
-	stage('Checkstyle test and report') {
-      steps {
-        sh '''
-          cd Chapter08/sample1
-          ./gradlew checkstyleMain
-        '''
-        }
-    }
-	stage('Jacoco code coverage running only on main branch') {
-      when {
-		branch 'main'
-	  }
-	  steps {
-        echo "Running code coverage test only in main branch"
-		sh '''
-          cd Chapter08/sample1
-          ./gradlew jacocoTestCoverageVerification
-        '''
-        }
-    }
-  }
+// week5 example uses Jenkin's "scripted" syntax, as opposed to its "declarative" syntax
+ // see: https://www.jenkins.io/doc/book/pipeline/syntax/#scripted-pipeline
+ // Defines a Kubernetes pod template that can be used to create nodes.
+podTemplate(
+	containers: [
+	containerTemplate(
+		name: 'gradle', image: 'gradle:6.3-jdk14', command: 'sleep', args: '30d'
+		),
+	]) {
+	node(POD_LABEL) {
+		stage('Run pipeline against a gradle project') {
+			// "container" Selects a container of the agent pod so that all shell steps are
+			// executed in that container.
+			container('gradle') {
+				stage('Build a gradle project') {
+					// from the git plugin
+					// https://www.jenkins.io/doc/pipeline/steps/git/
+					git 'https://github.com/pvvardhan/Continuous-Delivery-with-Docker-and-Jenkins-Second-Edition.git'
+					sh '''
+					cd Chapter08/sample1
+					chmod +x gradlew
+					./gradlew test
+					'''
+				}
+				stage("Code coverage") {
+						try {
+						sh '''
+							pwd
+							cd Chapter08/sample1
+							./gradlew jacocoTestCoverageVerification
+							./gradlew jacocoTestReport
+						'''
+						} catch (Exception E) {
+							echo 'Failure detected'
+						}
+						// from the HTML publisher plugin
+						// https://www.jenkins.io/doc/pipeline/steps/htmlpublisher/
+						publishHTML (target: [
+							reportDir: 'Chapter08/sample1/build/reports/tests/test',
+							reportFiles: 'index.html',
+							reportName: "JaCoCo Report"
+						])
+				}
+				stage("CheckStyle Analysis") {
+						sh '''
+							pwd
+							cd Chapter08/sample1
+							./gradlew checkstyleMain
+							./gradlew jacocoTestReport
+						'''
+						// from the HTML publisher plugin
+						// https://www.jenkins.io/doc/pipeline/steps/htmlpublisher/
+						publishHTML (target: [
+							reportDir: 'Chapter08/sample1/build/reports/checkstyle',
+							reportFiles: 'main.html',
+							reportName: "JaCoCo Checkstyle"
+						])
+				}
+			}
+		}
+	}
 }
