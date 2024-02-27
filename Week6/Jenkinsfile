@@ -1,55 +1,36 @@
-// This example uses Jenkin's "declarative" syntax
-
 pipeline {
-  agent {
-    kubernetes {
-      // Define the pod template directly within the kubernetes agent
-      containerTemplate {
-        name 'gradle'
-        image 'gradle'
-        command 'sleep'
-        args '30d'
-      }
-    }
-  }
-
-  stages {
-    stage('Checkout code and prepare environment') {
-      steps {
-        git url: 'https://github.com/pvvardhan/Continuous-Delivery-with-Docker-and-Jenkins-Second-Edition.git', branch: 'main'
-        sh """
-          cd Chapter08/sample1
-          chmod +x gradlew
-        """
-      }
-    }
-    stage('Run tests and generate reports') {
-      steps {
-        sh """
-          cd Chapter08/sample1
-          ./gradlew test
-        """
-        }
-    }
-	stage('Checkstyle test and report') {
-      steps {
-        sh """
-          cd Chapter08/sample1
-          ./gradlew checkstyleMain
-        """
-        }
-    }
-	stage('Jacoco code coverage running only on main branch') {
-      when {
-		branch 'main'
-	  }
-	  steps {
-        echo "Running code coverage test only in main branch"
-		sh """
-          cd Chapter08/sample1
-          ./gradlew jacocoTestCoverageVerification
-        """
-        }
-    }
-  }
+     agent any
+     stages {
+          stage("Build") {
+               steps {
+                    sh "./gradlew compileJava"
+               }
+          }
+          stage("Unit test") {
+               steps {
+                    sh "./gradlew test"
+               }
+          }
+          stage("Code coverage") {
+               steps {
+                    script{
+                         if(env.BRANCH_NAME == "main"){
+                          echo "Inside - Code Coverage.Branch is : ${env.BRANCH_NAME}"
+                         sh "./gradlew jacocoTestReport"
+                         sh "./gradlew jacocoTestCoverageVerification"
+                         }
+                         else{
+                              echo "Skipping Stage - Code Coverage"
+                         }
+                    }
+               }
+          }
+          stage("Static code analysis") {
+               steps {
+                    sh "./gradlew checkstyleMain"
+                    sh "./gradlew jacocoTestReport"
+               }
+          }
+          
+     }
 }
