@@ -60,7 +60,7 @@ pipeline {
  ./gradlew jacocoTestCoverageVerification
  ./gradlew jacocoTestReport
  """
- } catch )Exception E) {
+ } catch (Exception E) {
  echo 'code coverage test failed'
  }
  publishHTML (
