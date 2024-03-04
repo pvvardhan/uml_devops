@@ -2,4 +2,4 @@
 Repository to save files for the UML DevOps course
 
 Modified Week7 branch for multi-branch pipeline
-Updated for feature7 branch
+Updated for feature-branch-week7 branch
