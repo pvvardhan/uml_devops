@@ -35,7 +35,15 @@ pipeline {
  sh """
  cd Chapter08/sample1;
  ./gradlew checkstyleMain
+ ./gradlew jacocoTestReport
  """
+ publishHTML (
+          target: [
+            reportDir: 'Chapter08/sample1/build/reports/checkstyle',
+            reportFiles: 'main.html',
+            reportName: "JaCoCo Checkstyle Report"
+          ]
+        )
  }
  }
  stage('Run code coverage in main branch') {
@@ -45,7 +53,15 @@ pipeline {
  sh """
  cd Chapter08/sample1;
  ./gradlew jacocoTestCoverageVerification
+ ./gradlew jacocoTestReport
  """
+ publishHTML (
+          target: [
+            reportDir: 'Chapter08/sample1/build/reports/tests/test',
+            reportFiles: 'index.html',
+            reportName: "JaCoCo Code Coverage Report"
+          ]
+        )
  }
  }
  }
