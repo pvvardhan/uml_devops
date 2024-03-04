@@ -69,5 +69,11 @@ pipeline {
  always {
  echo 'pipeline completed'
  }
+ success {
+ echo 'pipeline success'
+ }
+ failure {
+ echo 'pipeline failed'
+ }
  }
  }
