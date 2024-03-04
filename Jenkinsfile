@@ -20,15 +20,31 @@ pipeline {
  """
  }
  }
- stage('Run pipeline against a gradle project- test branch') {
- when {
- not { branch 'main' }
- }
+ stage('Run pipeline against a gradle project- all branches') {
  steps {
- echo 'Unit test not main branch'
+ echo 'Unit test execution'
  sh """
  cd Chapter08/sample1;
  ./gradlew test
+ """
+ }
+ }
+ stage('Checkstyle Analysis') {
+ steps {
+ echo 'Running checkstyle rules'
+ sh """
+ cd Chapter08/sample1;
+ ./gradlew checkstyleMain
+ """
+ }
+ }
+ stage('Run code coverage in main branch') {
+ when { branch 'main' }
+ steps {
+ echo 'Running the code coverage in main branch'
+ sh """
+ cd Chapter08/sample1;
+ ./gradlew jacocoTestCoverageVerification
  """
  }
  }
