@@ -32,29 +32,26 @@ pipeline {
  stage('Checkstyle Analysis') {
  steps {
  echo 'Running checkstyle rules'
+ catchError {
  sh """
  cd Chapter08/sample1;
  ./gradlew checkstyleMain
  ./gradlew jacocoTestReport
  """
- publishHTML (
-          target: [
-            reportDir: 'Chapter08/sample1/build/reports/checkstyle',
-            reportFiles: 'main.html',
-            reportName: "JaCoCo Checkstyle Report"
-          ]
-        )
+ }
  }
  }
  stage('Run code coverage in main branch') {
  when { branch 'main' }
  steps {
  echo 'Running the code coverage in main branch'
+ catchError {
  sh """
  cd Chapter08/sample1;
  ./gradlew jacocoTestCoverageVerification
  ./gradlew jacocoTestReport
  """
+ }
  publishHTML (
           target: [
             reportDir: 'Chapter08/sample1/build/reports/tests/test',
@@ -70,10 +67,17 @@ pipeline {
  echo 'pipeline completed'
  }
  success {
- echo 'pipeline success'
+ echo 'pipeline succeeded'
  }
  failure {
- echo 'pipeline failed'
+ echo 'pipeline failed and error handled by catchError block'
+ publishHTML (
+          target: [
+            reportDir: 'Chapter08/sample1/build/reports/checkstyle',
+            reportFiles: 'main.html',
+            reportName: "JaCoCo Checkstyle Report"
+          ]
+        )
  }
  }
  }
