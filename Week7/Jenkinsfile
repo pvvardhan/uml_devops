@@ -74,7 +74,7 @@ pipeline {
  echo 'pipeline completed'
  }
  success {
- echo 'pipeline success'
+ echo 'pipeline succeeded'
  }
  failure {
  echo 'pipeline failed and error handled by catchError block'
