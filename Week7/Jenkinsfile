@@ -39,13 +39,6 @@ pipeline {
  ./gradlew jacocoTestReport
  """
  }
- publishHTML (
-          target: [
-            reportDir: 'Chapter08/sample1/build/reports/checkstyle',
-            reportFiles: 'main.html',
-            reportName: "JaCoCo Checkstyle Report"
-          ]
-        )
  }
  }
  stage('Run code coverage in main branch') {
@@ -78,6 +71,13 @@ pipeline {
  }
  failure {
  echo 'pipeline failed and error handled by catchError block'
+ publishHTML (
+          target: [
+            reportDir: 'Chapter08/sample1/build/reports/checkstyle',
+            reportFiles: 'main.html',
+            reportName: "JaCoCo Checkstyle Report"
+          ]
+        )
  }
  }
  }
