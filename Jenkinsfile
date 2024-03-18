@@ -74,10 +74,12 @@ spec:
  stage('Run code coverage in main branch only') {
  when { branch 'main' }
  steps {
- echo 'Running the code coverage in ${env.BRANCH_NAME} branch alone'
+ echo 'Running the code coverage in' ${env.BRANCH_NAME} 'branch alone'
  catchError {
  sh """
  cd Chapter08/sample1;
+ ./gradlew test
+ ./gradlew checkstyleMain
  ./gradlew jacocoTestCoverageVerification
  """
  }
