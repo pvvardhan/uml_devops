@@ -59,9 +59,9 @@ spec:
  }
  }
  stage('Run test and checksyle tests in non-main branch') {
- when not { branch 'main' }
+ when { not { branch 'main' } }
  steps {
- echo 'Unit test and checkstyle execution in non-main branch'
+ echo 'Unit test and checkstyle execution in ${env.BRANCH_NAME}'
  catchError {
  sh """
  cd Chapter08/sample1;
