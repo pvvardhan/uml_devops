@@ -75,24 +75,9 @@ spec:
  catchError {
  sh """
  cd Chapter08/sample1;
- ./gradlew test
- ./gradlew checkstyleMain
  ./gradlew jacocoTestCoverageVerification
  """
  }
- }
- }
- }
- stage('Build Java Image') {
- steps {
- container('kaniko') {
- sh '''
- echo 'FROM openjdk:8-jre' > Dockerfile
- echo 'COPY ./calculator-0.0.1-SNAPSHOT.jar app.jar' >> Dockerfile
- echo 'ENTRYPOINT ["java", "-jar", "app.jar"]' >> Dockerfile
- mv /mnt/calculator-0.0.1-SNAPSHOT.jar .
- /kaniko/executor --context `pwd` --destination pvvardhan/hello-kaniko:1.0
- '''
  }
  }
  }
@@ -106,6 +91,7 @@ spec:
  script {
   def branchName = env.BRANCH_NAME
   if (branchName == 'main') {
+    echo "Current branch: ${branchName}"
   container('kaniko') {
   sh '''
   echo 'FROM openjdk:8-jre' > Dockerfile
