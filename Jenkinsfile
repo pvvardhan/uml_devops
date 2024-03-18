@@ -71,6 +71,7 @@ spec:
  when { branch 'main' }
  steps {
  echo 'Running the code coverage in main branch alone'
+ container('gradle') {
  catchError {
  sh """
  cd Chapter08/sample1;
@@ -78,6 +79,7 @@ spec:
  ./gradlew checkstyleMain
  ./gradlew jacocoTestCoverageVerification
  """
+ }
  }
  }
  }
