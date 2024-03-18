@@ -1,7 +1,7 @@
-pipeline {
-agent {
-kubernetes {
-yaml """
+ pipeline {
+ agent {
+ kubernetes {
+ yaml """
 apiVersion: v1
 kind: Pod
 spec:
@@ -47,9 +47,9 @@ spec:
  container('gradle') {
  sh '''
  cd Chapter08/sample1
- sed -i 's/minimum = 0.2/minimum = 0.1/' build.gradle
- sed -i '/checkstyle {/,/}/d' build.gradle
- sed -i '/checkstyle/d' build.gradle
+ sed-i 's/minimum = 0.2/minimum = 0.1/' build.gradle
+ sed-i '/checkstyle {/,/}/d' build.gradle
+ sed-i '/checkstyle/d' build.gradle
  cat build.gradle
  chmod +x gradlew
  ./gradlew build
@@ -71,5 +71,51 @@ spec:
  }
  }
  }
+ stage('Run code coverage in main branch only') {
+ when { branch 'main' }
+ steps {
+ echo 'Running the code coverage in ${env.BRANCH_NAME} branch alone'
+ catchError {
+ sh """
+ cd Chapter08/sample1;
+ ./gradlew jacocoTestCoverageVerification
+ """
  }
-}
+ }
+ }
+ stage('Build Java Image') {
+ steps {
+ container('kaniko') {
+ sh '''
+ echo 'FROM openjdk:8-jre' > Dockerfile
+ echo 'COPY ./calculator-0.0.1-SNAPSHOT.jar app.jar' >> Dockerfile
+ echo 'ENTRYPOINT ["java", "-jar", "app.jar"]' >> Dockerfile
+ mv /mnt/calculator-0.0.1-SNAPSHOT.jar .
+ /kaniko/executor--context `pwd`--destination pvvardhan/hello-kaniko:1.0
+ '''
+ }
+ }
+ }
+ }
+ post {
+ always {
+ echo 'pipeline completed'
+ }
+ success {
+ echo 'pipeline succeeded and proceeding to create container'
+when {branch 'main'}
+container('kaniko') {
+ sh '''
+ echo 'FROM openjdk:8-jre' > Dockerfile
+ echo 'COPY ./calculator-0.0.1-SNAPSHOT.jar app.jar' >> Dockerfile
+ echo 'ENTRYPOINT ["java", "-jar", "app.jar"]' >> Dockerfile
+ mv /mnt/calculator-0.0.1-SNAPSHOT.jar .
+ /kaniko/executor--context `pwd`--destination pvvardhan/calculator:1.0
+ '''
+ }
+ }
+ failure {
+ echo 'pipeline failed and error handled by catchError block'
+ }
+ }
+ }
