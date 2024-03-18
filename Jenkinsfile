@@ -47,9 +47,9 @@ spec:
  container('gradle') {
  sh '''
  cd Chapter08/sample1
- sed-i 's/minimum = 0.2/minimum = 0.1/' build.gradle
- sed-i '/checkstyle {/,/}/d' build.gradle
- sed-i '/checkstyle/d' build.gradle
+ sed -i 's/minimum = 0.2/minimum = 0.1/' build.gradle
+ sed -i '/checkstyle {/,/}/d' build.gradle
+ sed -i '/checkstyle/d' build.gradle
  cat build.gradle
  chmod +x gradlew
  ./gradlew build
