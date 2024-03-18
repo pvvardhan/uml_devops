@@ -104,7 +104,8 @@ spec:
  success {
  echo 'pipeline succeeded and proceeding to create container'
  script {
-  when {branch 'main'}
+  def branchName = env.BRANCH_NAME
+  if (branchName == 'main') {
   container('kaniko') {
   sh '''
   echo 'FROM openjdk:8-jre' > Dockerfile
@@ -113,6 +114,7 @@ spec:
   mv /mnt/calculator-0.0.1-SNAPSHOT.jar .
   /kaniko/executor --context `pwd` --destination pvvardhan/calculator:1.0
   '''
+  }
   }
  }
  }
