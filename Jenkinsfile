@@ -54,10 +54,10 @@ spec:
  }
  }
  }
- stage('Run test and checksyle tests in non-main branch') {
+ stage('Run test and checksyle tests in non-main branches') {
  when { not { branch 'main' } }
  steps {
- echo 'Unit test and checkstyle execution in ${env.BRANCH_NAME}'
+ echo "Unit test and checkstyle execution in ${env.BRANCH_NAME} branch"
  catchError {
  sh """
  cd Chapter08/sample1;
@@ -70,7 +70,7 @@ spec:
  stage('Run code coverage in main branch only') {
  when { branch 'main' }
  steps {
- echo 'Running the code coverage in main branch alone'
+ echo "Running the code coverage in ${env.BRANCH_NAME} branch alone"
  container('gradle') {
  catchError {
  sh """
@@ -87,11 +87,11 @@ spec:
  echo 'pipeline completed'
  }
  success {
- echo 'pipeline succeeded and proceeding to create container'
+ echo "pipeline succeeded"
  script {
   def branchName = env.BRANCH_NAME
   if (branchName == 'main') {
-    echo "Current branch: ${branchName}"
+    echo "Current branch: ${branchName}. Building container"
   container('kaniko') {
   sh '''
   echo 'FROM openjdk:8-jre' > Dockerfile
@@ -101,6 +101,22 @@ spec:
   /kaniko/executor --context `pwd` --destination pvvardhan/calculator:1.0
   '''
   }
+  }
+  else if (branchName == 'feature') {
+    echo "Current branch: ${branchName}. Building container"
+  container('kaniko') {
+  sh '''
+  echo 'FROM openjdk:8-jre' > Dockerfile
+  echo 'COPY ./calculator-0.0.1-SNAPSHOT.jar app.jar' >> Dockerfile
+  echo 'ENTRYPOINT ["java", "-jar", "app.jar"]' >> Dockerfile
+  mv /mnt/calculator-0.0.1-SNAPSHOT.jar .
+  /kaniko/executor --context `pwd` --destination pvvardhan/calculator-feature:0.1
+  '''
+  }
+  }
+  else 
+  {
+    echo "Current branch: ${branchName}. Hence skipping the container build"
   }
  }
  }
