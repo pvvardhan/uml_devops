@@ -58,12 +58,14 @@ spec:
  when { not { branch 'main' } }
  steps {
  echo "Unit test and checkstyle execution in ${env.BRANCH_NAME} branch"
+ container('gradle') {
  catchError {
  sh """
  cd Chapter08/sample1;
  ./gradlew test
  ./gradlew checkstyleMain
  """
+ }
  }
  }
  }
