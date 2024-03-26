@@ -41,7 +41,7 @@ restartPolicy: Never
  sh '''
   test $(curl calculator-service:8080/sum?a=6\\&b=2) -eq 8 && echo 'pass' || echo 'fail'
   test $(curl calculator-service:8080/div?a=6\\&b=2) -eq 3 && echo 'pass' || echo 'fail'
-  test $(curl calculator-service:8080/div?a=6\\&b=0) -eq 3 && echo 'Not divisable' || echo 'fail'
+  test $(curl calculator-service:8080/div?a=6\\&b=0) -eq 'Division by 0' && echo 'Not divisable by zero' || echo 'fail'
  '''
  }
  }
@@ -50,7 +50,13 @@ restartPolicy: Never
  }
  post {
  always {
- echo 'pipeline completed'
+ echo 'pipeline completed - cleaning up resources'
+ container('gradle') {
+  sh '''
+  ./kubectl delete service hazelcast calculator-service -n devops-tools
+  ./kubectl delete deployment hazelcast calculator-deployment -n devops-tools
+  '''
+  }
  }
  }
  }
