@@ -28,6 +28,7 @@ restartPolicy: Never
  chmod +x ./kubectl
  ./kubectl apply -f calculator.yaml
  ./kubectl apply -f hazelcast.yaml
+ sleep 20
  '''
  }
  }
