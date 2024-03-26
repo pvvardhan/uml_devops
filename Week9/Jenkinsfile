@@ -53,8 +53,9 @@ restartPolicy: Never
  echo 'pipeline completed - cleaning up resources'
  container('gradle') {
   sh '''
-  kubectl delete service hazelcast calculator-service -n devops-tools
-  kubectl delete deployment hazelcast calculator-deployment -n devops-tools
+  cd Chapter08/sample1
+  ./kubectl delete service hazelcast calculator-service -n devops-tools
+  ./kubectl delete deployment hazelcast calculator-deployment -n devops-tools
   '''
   }
  }
