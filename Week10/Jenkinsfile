@@ -6,6 +6,13 @@ apiVersion: v1
 kind: Pod
 spec:
   containers:
+    - name: gradle
+      image: gradle:jdk8
+      command:
+        - sleep
+      args:
+        - "99d"
+      restartPolicy: Never
     - name: cloud-sdk
       image: google/cloud-sdk:latest
       command:
@@ -20,7 +27,7 @@ spec:
       env:
         - name: GOOGLE_APPLICATION_CREDENTIALS
           value: /var/secrets/google/umls24-418119-e57e00d7513d.json
-  restartPolicy: Never
+      restartPolicy: Never
   volumes:
     - name: shared-storage
       persistentVolumeClaim:
