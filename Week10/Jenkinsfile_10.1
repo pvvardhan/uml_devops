@@ -1,0 +1,54 @@
+ pipeline {
+ agent {
+ kubernetes {
+ yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+    - name: gradle
+      image: gradle:jdk8
+      command:
+        - sleep
+      args:
+        - 99d
+restartPolicy: Never
+"""
+ }
+ }
+ stages {
+ stage('Start the calculator') {
+ steps {
+ git url: 'https://github.com/pvvardhan/Continuous-Delivery-with-Docker-and-Jenkins-Second-Edition.git', branch: 'master'
+ container('gradle') {
+ sh '''
+ cd Chapter08/sample1
+ curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+ chmod +x ./kubectl
+ ./kubectl get pods -n staging
+ 
+ '''
+ }  
+ }
+ }
+ 
+ stage ('Rolling update of calculator pod') {
+ steps {
+ container('gradle') {
+ sh '''
+ cd Chapter08/sample1
+ chmod +x ./kubectl
+ ./kubectl apply -f calculator.yaml -n staging
+ ./kubectl apply -f hazelcast.yaml -n staging
+ ./kubectl get pods -n staging
+ '''
+ }
+ }
+ }
+ }
+ post {
+ always {
+ echo 'pipeline completed'
+ }
+ }
+ }

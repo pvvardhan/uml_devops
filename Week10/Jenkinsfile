@@ -2,22 +2,37 @@
  agent {
  kubernetes {
  yaml """
-apiVersion: v1
-kind: Pod
-spec:
-  containers:
-    - name: gradle
-      image: gradle:jdk8
-      command:
-        - sleep
-      args:
-        - 99d
-restartPolicy: Never
+ apiVersion: v1
+ kind: Pod
+ spec:
+   containers:
+     - name: cloud-sdk
+       image: google/cloud-sdk:latest
+       command:
+       - sleep
+       args:
+       - 9999999
+       volumeMounts:
+       - name: shared-storage
+         mountPath: /mnt
+       - name: google-cloud-key
+         mountPath: /var/secrets/google
+       env:
+       - name: GOOGLE_APPLICATION_CREDENTIALS
+       value: /var/secrets/google/umldevops-418804-82fcc4967114.json
+ restartPolicy: Never
+ volumes:
+  - name: shared-storage
+ persistentVolumeClaim:
+  claimName: jenkins-pv-claim
+    - name: google-cloud-key
+  secret:
+  secretName: sdk-key
 """
  }
  }
  stages {
- stage('Start the calculator') {
+ stage('Calculator smoke test') {
  steps {
  git url: 'https://github.com/pvvardhan/Continuous-Delivery-with-Docker-and-Jenkins-Second-Edition.git', branch: 'master'
  container('gradle') {
@@ -25,22 +40,26 @@ restartPolicy: Never
  cd Chapter08/sample1
  curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
  chmod +x ./kubectl
- ./kubectl get pods -n staging
- 
+ chmod +x gradlew
+ ./kubectl apply -f calculator.yaml
+ ./kubectl apply -f hazelcast.yaml
+ sleep 20
+ ./gradlew smokeTest -Dcalculator.url=http://calculator-service.staging.svc.cluster.local:8080
  '''
- }  
  }
  }
- 
- stage ('Rolling update of calculator pod') {
+ }
+ stage('Deploy to cloud') {
  steps {
- container('gradle') {
+ container('cloud-sdk') {
  sh '''
- cd Chapter08/sample1
- chmod +x ./kubectl
- ./kubectl apply -f calculator.yaml -n staging
- ./kubectl apply -f hazelcast.yaml -n staging
- ./kubectl get pods -n staging
+ echo "Deploying to GKE"
+ gcloud auth login --cred-file=$GOOGLE_APPLICATION_CREDENTIALS --no-launch-browser
+ gcloud container clusters get-credentials umldevops-cluster --region us-central1 --project umldevops-418804
+ echo 'namespaces in the GKE "prod" environment'
+ kubectl get ns
+ kubectl apply -f calculator.yaml 
+ kubectl apply -f hazelcast.yaml
  '''
  }
  }
@@ -52,3 +71,4 @@ restartPolicy: Never
  }
  }
  }
+ 
