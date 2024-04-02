@@ -33,6 +33,7 @@ restartPolicy: Never
  }
  
  stage ('Rolling update of calculator pod') {
+ steps {
  container('gradle') {
  sh '''
  cd Chapter08/sample1
@@ -41,6 +42,7 @@ restartPolicy: Never
  ./kubectl apply -f hazelcast.yaml
  ./kubectl get pods -n devops-tools
  '''
+ }
  }
  }
  }
