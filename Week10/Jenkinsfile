@@ -3,31 +3,31 @@
  kubernetes {
  yaml """
  apiVersion: v1
- kind: Pod
- spec:
-   containers:
-     - name: cloud-sdk
-       image: google/cloud-sdk:latest
-       command:
-       - sleep
-       args:
-       - 9999999
-       volumeMounts:
-       - name: shared-storage
-         mountPath: /mnt
-       - name: google-cloud-key
-         mountPath: /var/secrets/google
-       env:
-       - name: GOOGLE_APPLICATION_CREDENTIALS
-       value: /var/secrets/google/umldevops-418804-82fcc4967114.json
- restartPolicy: Never
- volumes:
-  - name: shared-storage
- persistentVolumeClaim:
-  claimName: jenkins-pv-claim
+kind: Pod
+spec:
+  containers:
+    - name: cloud-sdk
+      image: google/cloud-sdk:latest
+      command:
+        - sleep
+      args:
+        - "9999999"
+      volumeMounts:
+        - name: shared-storage
+          mountPath: /mnt
+        - name: google-cloud-key
+          mountPath: /var/secrets/google
+      env:
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /var/secrets/google/umls24-418119-e57e00d7513d.json
+  restartPolicy: Never
+  volumes:
+    - name: shared-storage
+      persistentVolumeClaim:
+        claimName: jenkins-pv-claim
     - name: google-cloud-key
-  secret:
-  secretName: sdk-key
+      secret:
+        secretName: sdk-key
 """
  }
  }
