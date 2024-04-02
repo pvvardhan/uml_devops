@@ -68,6 +68,7 @@ restartPolicy: Never
  gcloud container clusters get-credentials umldevops-cluster --region us-central1 --project umldevops-418804
  echo 'namespaces in the GKE "prod" environment'
  kubectl get ns
+ cd Chapter08/sample1
  kubectl apply -f calculator.yaml 
  kubectl apply -f hazelcast.yaml
  '''
