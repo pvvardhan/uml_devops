@@ -26,14 +26,14 @@ spec:
       env:
         - name: GOOGLE_APPLICATION_CREDENTIALS
           value: /var/secrets/google/umls24-418119-e57e00d7513d.json
-      restartPolicy: Never
-  volumes:
+      volumes:
     - name: shared-storage
       persistentVolumeClaim:
         claimName: jenkins-pv-claim
     - name: google-cloud-key
       secret:
         secretName: sdk-key
+restartPolicy: Never
 """
  }
  }
