@@ -53,7 +53,7 @@ restartPolicy: Never
  ./kubectl apply -f calculator.yaml
  ./kubectl apply -f hazelcast.yaml
  sleep 20
- ./gradlew smokeTest -Dcalculator.url=http://calculator-service.staging.svc.cluster.local:8080
+ ./gradlew smokeTest -Dcalculator.url=http://calculator-service.devops-tools.svc.cluster.local:8080
  '''
  }
  }
@@ -76,7 +76,14 @@ restartPolicy: Never
  }
  post {
  always {
- echo 'pipeline completed'
+ echo 'pipeline completed - cleaning up resources in Gradle container'
+ container('gradle') {
+  sh '''
+  cd Chapter08/sample1
+  ./kubectl delete service hazelcast calculator-service -n devops-tools
+  ./kubectl delete deployment hazelcast calculator-deployment -n devops-tools
+  '''
+  }
  }
  }
  }
