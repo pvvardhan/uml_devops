@@ -12,7 +12,6 @@ spec:
         - sleep
       args:
         - "99d"
-      restartPolicy: Never
     - name: cloud-sdk
       image: google/cloud-sdk:latest
       command:
