@@ -64,6 +64,7 @@ restartPolicy: Never
  sh '''
  echo "Deploying to GKE"
  gcloud auth login --cred-file=$GOOGLE_APPLICATION_CREDENTIALS --no-launch-browser
+ gcloud config set project PROJECT_ID
  gcloud container clusters get-credentials umldevops-cluster --region us-central1 --project umldevops-418804
  echo 'namespaces in the GKE "prod" environment'
  kubectl get ns
